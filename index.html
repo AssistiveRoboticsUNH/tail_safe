@@ -129,17 +129,17 @@
 
     <div class="figpair">
       <figure>
-        <img src="assets/images/weights.png" alt="Learned WeightNet weights">
+        <div class="imgwrap"><img src="assets/images/weights.png" alt="Learned WeightNet weights"></div>
         <figcaption><strong>Figure&nbsp;2.</strong> Learned criterion weights along a pick-and-place trajectory. WeightNet shifts emphasis from visibility during the approach phase to graspability near contact, then rebalances at completion.</figcaption>
       </figure>
       <figure>
-        <img src="assets/images/trajectory_grid.png" alt="2D Q-value landscapes">
+        <div class="imgwrap"><img src="assets/images/trajectory_grid.png" alt="2D Q-value landscapes"></div>
         <figcaption><strong>Figure&nbsp;3.</strong> Two-dimensional slices of the learned <i>Q</i>-function around expert actions. The function forms a bounded "hill" of safety with a clean negative exterior, exactly the structure required for recovery.</figcaption>
       </figure>
     </div>
 
     <figure class="fig-single">
-      <img src="assets/images/Landscape_value_sujosh.png" alt="3D safety landscape">
+      <div class="imgwrap"><img src="assets/images/Landscape_value_sujosh.png" alt="3D safety landscape"></div>
       <figcaption><strong>Figure&nbsp;4.</strong> The three-dimensional value landscape over the workspace. The zero-superlevel set defines an empirical control-invariant safe set; crossing its boundary is a reliable predictor of imminent task failure.</figcaption>
     </figure>
   </div>
@@ -195,26 +195,28 @@
       action, and the recovery controller is triggered.
     </p>
 
+    <div class="tblwrap">
     <table class="tbl">
-      <caption><strong>Table&nbsp;1.</strong> Headline performance on the digital-twin evaluation set. Values are averages over 270 perturbed rollouts.</caption>
+      <caption><strong>Table&nbsp;1.</strong> Headline performance on the digital-twin evaluation set, averaged over 270 perturbed rollouts. Best row in <strong>bold</strong>.</caption>
       <thead>
-        <tr><th>Method</th><th class="num">Traj. AUROC</th><th class="num">State AUROC</th><th class="num">Recovery&nbsp;%</th><th class="num">Detect.&nbsp;latency</th></tr>
+        <tr><th>Method</th><th class="num">Traj. AUROC</th><th class="num">State AUROC</th><th class="num">Recovery</th><th class="num">Latency</th></tr>
       </thead>
       <tbody>
-        <tr><td>Equal-weight criteria</td><td class="num">0.437</td><td class="num">0.514</td><td class="num">—</td><td class="num">—</td></tr>
-        <tr><td>WeightNet only (no recovery)</td><td class="num">0.971</td><td class="num">0.928</td><td class="num">—</td><td class="num">—</td></tr>
-        <tr><td><i>Q</i>-function, no energy shaping</td><td class="num">0.984</td><td class="num">0.943</td><td class="num">20%</td><td class="num">15&nbsp;ms</td></tr>
-        <tr class="best"><td><strong>TAIL-Safe (full)</strong></td><td class="num"><strong>0.993</strong></td><td class="num"><strong>0.962</strong></td><td class="num"><strong>100%</strong></td><td class="num"><strong>23&nbsp;ms</strong></td></tr>
+        <tr><td>Equal-weight criteria</td><td class="num">0.437</td><td class="num">0.514</td><td class="num">&mdash;</td><td class="num">&mdash;</td></tr>
+        <tr><td>WeightNet only (no recovery)</td><td class="num">0.971</td><td class="num">0.928</td><td class="num">&mdash;</td><td class="num">&mdash;</td></tr>
+        <tr><td><i>Q</i>-function, no energy shaping</td><td class="num">0.984</td><td class="num">0.943</td><td class="num">20%</td><td class="num">15&thinsp;ms</td></tr>
+        <tr class="best"><td>TAIL-Safe (full)</td><td class="num">0.993</td><td class="num">0.962</td><td class="num">100%</td><td class="num">23&thinsp;ms</td></tr>
       </tbody>
     </table>
+    </div>
 
     <div class="figpair">
       <figure>
-        <img src="assets/images/recovery_real_robot.png" alt="Real-robot recovery sequence">
+        <div class="imgwrap"><img src="assets/images/recovery_real_robot.png" alt="Real-robot recovery sequence"></div>
         <figcaption><strong>Figure&nbsp;5.</strong> A representative real-robot recovery: the operator perturbs the end-effector mid-trajectory; the safety filter triggers, gradient ascent on <i>Q</i> brings the arm back into the safe set, and the policy resumes without an explicit reset.</figcaption>
       </figure>
       <figure>
-        <img src="assets/images/extreme_cases.png" alt="Extreme out-of-distribution cases">
+        <div class="imgwrap"><img src="assets/images/extreme_cases.png" alt="Extreme out-of-distribution cases"></div>
         <figcaption><strong>Figure&nbsp;6.</strong> Severe out-of-distribution scenes on the real arm. The base policy diverges; TAIL-Safe correctly flags these states as unsafe in real time and refuses to execute the nominal action.</figcaption>
       </figure>
     </div>
@@ -292,28 +294,28 @@
       <p class="desc">Successful and intentionally failed rollouts collected inside the photo-real twin, used to train WeightNet and the reach-avoid <i>Q</i>-function. No physical robot is required for this stage.</p>
       <div class="video-row">
         <div class="vcard">
-          <video src="videos/simulation_success_pick_place_data_collection_in_GS.mp4" controls preload="metadata" playsinline muted></video>
+          <video src="videos/simulation_success_pick_place_data_collection_in_GS.mp4?v=2" controls preload="metadata" playsinline muted></video>
           <div class="vmeta">
             <h4>Successful rollout&nbsp;1</h4>
             <p>Nominal pick-and-place inside the twin.</p>
           </div>
         </div>
         <div class="vcard">
-          <video src="videos/simulation_success_pick_place_data_collection_in_GS_2.mp4" controls preload="metadata" playsinline muted></video>
+          <video src="videos/simulation_success_pick_place_data_collection_in_GS_2.mp4?v=2" controls preload="metadata" playsinline muted></video>
           <div class="vmeta">
             <h4>Successful rollout&nbsp;2</h4>
             <p>±5&nbsp;cm variation in object placement.</p>
           </div>
         </div>
         <div class="vcard">
-          <video src="videos/simulation_success_pick_place_data_collection_in_GS_3.mp4" controls preload="metadata" playsinline muted></video>
+          <video src="videos/simulation_success_pick_place_data_collection_in_GS_3.mp4?v=2" controls preload="metadata" playsinline muted></video>
           <div class="vmeta">
             <h4>Successful rollout&nbsp;3</h4>
             <p>±30° variation in object orientation.</p>
           </div>
         </div>
         <div class="vcard">
-          <video src="videos/simulation_success_pick_place_data_collection_in_GS_failure.mp4" controls preload="metadata" playsinline muted></video>
+          <video src="videos/simulation_success_pick_place_data_collection_in_GS_failure.mp4?v=2" controls preload="metadata" playsinline muted></video>
           <div class="vmeta">
             <h4>Failure rollout (unsafe class)</h4>
             <p>An intentionally failed trajectory used to label the unsafe region of state-action space.</p>
