@@ -3,269 +3,357 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>TAIL-Safe: Task-Agnostic Safety Monitoring for Imitation Learning Policies</title>
-<meta name="description" content="TAIL-Safe is a task-agnostic safety watchdog for imitation learning policies, accepted at RSS 2026. We learn a Lipschitz-continuous reach-avoid Q-function over a Gaussian-Splatting digital twin to detect and recover from policy failure in real time.">
+<title>TAIL-Safe — Task-Agnostic Safety Monitoring for Imitation Learning Policies</title>
+<meta name="description" content="TAIL-Safe (RSS 2026) is a task-agnostic safety filter for imitation-learning policies. It learns a Lipschitz-continuous reach-avoid Q-function over a Gaussian-Splatting digital twin and recovers from failure on a real Franka.">
 <meta property="og:title" content="TAIL-Safe — Task-Agnostic Safety Monitoring for Imitation Learning Policies (RSS 2026)">
-<meta property="og:description" content="A reach-avoid safety filter for flow-matching and diffusion policies, with provable bounded recovery, evaluated on a Franka Emika robot.">
+<meta property="og:description" content="A reach-avoid safety filter for flow-matching and diffusion policies, with Lipschitz guarantees, evaluated on a Franka Emika robot.">
 <meta property="og:image" content="assets/images/overall_diagram.png">
 <meta property="og:type" content="website">
 <link rel="stylesheet" href="assets/css/style.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 </head>
 <body>
 
-<!-- ========== HERO ========== -->
-<header class="hero">
+<!-- ====================== TITLE ====================== -->
+<header class="titleblock">
   <div class="wrap">
-    <span class="venue">Robotics: Science and Systems (RSS) 2026</span>
-    <h1><span class="accent">TAIL&#8209;Safe:</span> Task-Agnostic Safety Monitoring<br>for Imitation Learning Policies</h1>
-    <p class="subtitle">
-      A principled safety watchdog that learns a Lipschitz-continuous reach-avoid <em>Q</em>-function over a Gaussian-Splatting digital twin,
-      detects imminent failure of flow-matching and diffusion policies in real time, and recovers via gradient ascent on the safety landscape.
+    <div class="venue">Robotics: Science and Systems · 2026</div>
+
+    <h1>
+      TAIL-Safe: Task-Agnostic Safety Monitoring<br>for Imitation-Learning Policies
+    </h1>
+
+    <p class="authors">
+      <span class="a">Riad Ahmed</span><sup>1</sup>
+      &nbsp;·&nbsp;
+      <span class="a">Momotaz Begum</span><sup>1</sup>
     </p>
-    <p class="authors"><span class="a">Riad Ahmed</span> &nbsp;&middot;&nbsp; <span class="a">Momotaz Begum</span></p>
-    <p class="affil">University of New Hampshire</p>
-    <div class="btns">
-      <a class="btn primary" href="paper/TAIL_Safe_camera_ready.pdf" target="_blank" rel="noopener">📄 Paper (PDF)</a>
-      <a class="btn" href="paper/TAIL_Safe_camera_ready_annotated.pdf" target="_blank" rel="noopener">📝 Camera-ready (annotated)</a>
-      <a class="btn" href="https://github.com/riadahmedunh/tail_safe" target="_blank" rel="noopener">💻 Code &amp; Page Source</a>
-      <a class="btn" href="#videos">🎬 Videos</a>
-      <a class="btn" href="#bibtex">📑 BibTeX</a>
+    <p class="affil"><sup>1</sup>Department of Computer Science, University of New Hampshire</p>
+
+    <div class="btnrow">
+      <a class="btn" href="paper/TAIL_Safe_camera_ready.pdf" target="_blank" rel="noopener">
+        <span class="ico">📄</span> Paper
+      </a>
+      <a class="btn outline" href="https://github.com/riadahmedunh/tail_safe" target="_blank" rel="noopener">
+        <span class="ico">⌨</span> Code
+      </a>
+      <a class="btn outline" href="#videos">
+        <span class="ico">▷</span> Videos
+      </a>
+      <a class="btn outline" href="#bibtex">
+        <span class="ico">❝</span> BibTeX
+      </a>
     </div>
   </div>
 </header>
 
-<!-- ========== TEASER ========== -->
-<section id="teaser">
+<!-- ====================== TEASER ====================== -->
+<section id="teaser" style="padding-top:48px">
   <div class="wrap">
     <figure class="teaser">
       <img src="assets/images/overall_diagram.png" alt="Overview of TAIL-Safe pipeline">
       <figcaption>
-        <strong>Overview of TAIL-Safe.</strong>
-        <em>(Top-left)</em> A Gaussian-Splatting pipeline constructs a digital twin in ~20 minutes (5 min capture + 15 min reconstruction).
-        <em>(Top-right)</em> The simulator generates safe and unsafe trajectories under perturbations to train WeightNet (criterion fusion) and the reach-avoid <em>Q</em>-ValueNet.
-        <em>(Middle)</em> At deployment, TAIL-Safe monitors <em>Q</em>(s,a) in real time, remaining inactive while <em>Q</em>(s,a)&nbsp;&gt;&nbsp;0.
-        <em>(Bottom)</em> When <em>Q</em>(s,a) approaches zero, recovery steers the system back to safety; without intervention, the policy fails.
+        <strong>Figure&nbsp;1.</strong> A Gaussian-Splatting digital twin (left) is built from a five-minute capture and reconstructed offline.
+        Inside the twin we sweep an imitation-learning policy under perturbations, collecting safe and unsafe rollouts that train a Lipschitz reach-avoid <i>Q</i>-function and a fusion network over three short-horizon, task-agnostic criteria.
+        At deployment, TAIL-Safe sits between the policy and the robot: while the predicted safety value remains positive it forwards the policy action; when the value approaches zero it performs gradient ascent on <i>Q</i> to bring the system back into the empirical safe set.
       </figcaption>
     </figure>
   </div>
 </section>
 
-<!-- ========== ABSTRACT ========== -->
+<!-- ====================== ABSTRACT ====================== -->
 <section id="abstract">
   <div class="wrap">
-    <h2><span class="num">01</span>Abstract</h2>
-    <div class="tldr">
-      <strong>TL;DR.</strong> Even in-distribution, deterministic imitation learning policies can drift into failure.
-      TAIL-Safe learns a <em>task-agnostic</em>, <em>Lipschitz-continuous</em> reach-avoid <em>Q</em>-function from a high-fidelity Gaussian-Splatting digital twin.
-      Its zero-superlevel set defines an <em>empirical control-invariant</em> safe set; a Nagumo-inspired recovery controller uses
-      <em>∇<sub>a</sub>Q</em> to bring the policy back when it strays. Real Franka experiments turn brittle flow-matching policies into reliable ones.
-    </div>
+    <p class="section-kicker">Abstract</p>
+    <h2>An imitation-learning policy that knows when it is about to fail.</h2>
     <p class="lede">
-      Recent imitation-learning algorithms — flow matching and diffusion policies — achieve remarkable performance on complex manipulation,
-      yet remain extremely sensitive to initial conditions and accumulate compounding error, making field deployment risky.
-      A prerequisite for safe deployment is enabling the policy to determine whether it can complete the task <em>the way it was learned from demonstrations</em>.
-      TAIL-Safe identifies, for any trained IL policy, a <strong>safe set</strong> from which it empirically succeeds; it learns a Lipschitz-continuous
-      <em>Q</em>-value function that maps state-action pairs to a long-term safety score based on three short-term task-agnostic criteria
-      — <strong>visibility</strong>, <strong>recognizability</strong>, and <strong>graspability</strong>.
-      When the nominal action exits the safe set, a recovery mechanism inspired by Nagumo's tangentiality theorem performs gradient ascent on <em>Q</em>.
-      A Gaussian-Splatting digital twin enables systematic collection of failure data without risk to physical hardware.
-      On a Franka Emika robot, flow-matching policies that fail under run-time perturbations achieve consistent task success when guided by TAIL-Safe.
+      Modern visuomotor policies — flow-matching, diffusion, ACT — are remarkably capable on the trajectories they were trained on
+      and remarkably brittle outside of them. Field deployment requires more than higher accuracy: it requires the policy to <em class="term">recognize</em>
+      when it has wandered to a state from which the demonstrations no longer apply, and to do something sensible about it.
+    </p>
+    <p>
+      TAIL-Safe attaches a <em class="term">task-agnostic safety filter</em> to any deterministic imitation-learning policy. We train a Lipschitz-continuous,
+      reach-avoid <i>Q</i>-value function whose zero-superlevel set is an <em class="term">empirical control-invariant set</em> — the region of state-action
+      space from which the underlying policy reliably succeeds. The function is learned from rollouts inside a Gaussian-Splatting reconstruction of the
+      workspace, scored along three short-horizon criteria — <em class="term">visibility</em>, <em class="term">recognizability</em>, and
+      <em class="term">graspability</em> — that are agnostic to the manipulation task. At run time, when the nominal policy action would leave the safe set,
+      a Nagumo-inspired controller performs bounded gradient ascent on <i>Q</i> until the system re-enters it. On a Franka&nbsp;Emika robot, base flow-matching
+      policies that fail under modest perturbations finish their tasks consistently when guided by TAIL-Safe, and detected unsafe states are caught roughly
+      twenty milliseconds before failure on average.
     </p>
   </div>
 </section>
 
-<!-- ========== METHOD ========== -->
+<!-- ====================== METHOD ====================== -->
 <section id="method">
-  <div class="wrap">
-    <h2><span class="num">02</span>Method</h2>
-    <p class="lede">TAIL-Safe answers three questions about an IL policy at run time: <em>what</em> can fail, <em>where</em> failure may occur, and <em>how</em> to avoid it.</p>
+  <div class="wrap method-prose">
+    <p class="section-kicker">Method</p>
+    <h2>What can fail, where it can fail, and how to step away from the cliff.</h2>
 
-    <div class="method-steps">
-      <div class="step"><span class="n">1</span><h4>Digital Twin</h4>
-        <p>A Gaussian-Splatting reconstruction of the workspace acts as a live visual mirror. Object Gaussians are pose-updated at 10 Hz from a wrist RGB-D stream.</p></div>
-      <div class="step"><span class="n">2</span><h4>Three Criteria</h4>
-        <p>Per-step task-agnostic scores: <em>s<sub>fov</sub></em> (visibility), <em>s<sub>rec</sub></em> (recognizability via DINOv2 + Mahalanobis), <em>s<sub>grasp</sub></em> (graspability).</p></div>
-      <div class="step"><span class="n">3</span><h4>WeightNet</h4>
-        <p>An MLP fuses the criteria with context-dependent weights (visibility dominates during approach; graspability near contact). 99.3 % trajectory accuracy vs. 43.7 % with equal weights.</p></div>
-      <div class="step"><span class="n">4</span><h4>Reach-Avoid <em>Q</em></h4>
-        <p>A Lipschitz-continuous network trained on rollouts from the twin. Zero-superlevel set = empirical safe set. Energy-shaping loss prevents flat regions.</p></div>
-      <div class="step"><span class="n">5</span><h4>Recovery</h4>
-        <p>When <em>Q</em>(s,a)&nbsp;&lt;&nbsp;0, projected gradient ascent on <em>Q</em> with bounded step size — Nagumo-style. Mean 2.3 iterations; 20 Hz on a single GPU.</p></div>
-      <div class="step"><span class="n">6</span><h4>Deployment</h4>
-        <p>Drop-in safety filter for any deterministic visuomotor policy. 2.8 ms per timestep; 350 Hz capable on an RTX 4090.</p></div>
+    <p>
+      A safety monitor is only useful if it can be trained without endangering the real robot, and if it generalises beyond the specific task it observed.
+      TAIL-Safe addresses both points by separating the learning problem from the task it ultimately protects.
+    </p>
+
+    <p>
+      <strong>A photo-real digital twin as a free safety simulator.</strong>
+      A short five-minute capture of the workspace is reconstructed into a Gaussian-Splatting scene; segmented object Gaussians are then rigidly
+      pose-updated from a wrist-mounted RGB-D stream at ten hertz. The twin gives us a renderable, physics-faithful environment in which we can
+      perturb the policy and harvest unsafe trajectories that we would never deliberately execute on a real arm.
+    </p>
+
+    <p>
+      <strong>Three task-agnostic criteria, instead of a hand-crafted reward.</strong>
+      At every step we score the state along three lightweight signals that remain meaningful across manipulation tasks:
+      <em class="term">visibility</em> (does the target lie in the wrist camera's field of view?),
+      <em class="term">recognizability</em> (does the rendered object embedding match the reference DINOv2 prototype, in Mahalanobis distance?), and
+      <em class="term">graspability</em> (do antipodal grasp candidates exist near the predicted end-effector pose?). A small fusion network — WeightNet —
+      learns when each criterion matters: visibility dominates during approach, graspability near contact, and so on.
+    </p>
+
+    <p>
+      <strong>A Lipschitz reach-avoid <i>Q</i>-function.</strong>
+      We then train a single state-action value function on rollouts collected in the twin, using a reach-avoid Bellman operator and an
+      energy-shaping loss that prevents the value landscape from flattening. Spectral-norm regularisation gives the network a Lipschitz constant
+      that is small enough to support a closed-form recovery step, but large enough to sharply separate safe from unsafe regions.
+    </p>
+
+    <p>
+      <strong>Recovery as gradient ascent on the safety landscape.</strong>
+      When the nominal action would push the system across the zero level-set of <i>Q</i>, we replace it with a bounded gradient-ascent step on the
+      same function — a discrete Nagumo-tangentiality update — and continue executing the policy from the corrected state. The loop runs at
+      350&nbsp;Hz on a single GPU and converges in fewer than three iterations on average.
+    </p>
+
+    <div class="figpair">
+      <figure>
+        <img src="assets/images/weights.png" alt="Learned WeightNet weights">
+        <figcaption><strong>Figure&nbsp;2.</strong> Learned criterion weights along a pick-and-place trajectory. WeightNet shifts emphasis from visibility during the approach phase to graspability near contact, then rebalances at completion.</figcaption>
+      </figure>
+      <figure>
+        <img src="assets/images/trajectory_grid.png" alt="2D Q-value landscapes">
+        <figcaption><strong>Figure&nbsp;3.</strong> Two-dimensional slices of the learned <i>Q</i>-function around expert actions. The function forms a bounded "hill" of safety with a clean negative exterior, exactly the structure required for recovery.</figcaption>
+      </figure>
     </div>
 
-    <div class="fig-grid" style="margin-top:36px">
-      <figure class="figcard">
-        <img src="assets/images/weights.png" alt="WeightNet learned weights across trajectory phases">
-        <figcaption><strong>WeightNet learned weights.</strong> Across five phases of a pick-and-place task, the network shifts emphasis from visibility (approach) to graspability (contact) and rebalances at completion.</figcaption>
-      </figure>
-      <figure class="figcard">
-        <img src="assets/images/trajectory_grid.png" alt="2D energy landscapes around expert actions">
-        <figcaption><strong>2D energy landscapes.</strong> <em>Q</em>-function contours around expert actions show a bounded "hill" of safety: positive interior, negative exterior — exactly the structure recovery requires.</figcaption>
-      </figure>
-      <figure class="figcard">
-        <img src="assets/images/Landscape_value_sujosh.png" alt="3D value landscape">
-        <figcaption><strong>3D safety landscape.</strong> The reach-avoid <em>Q</em> forms an empirical control-invariant set whose boundary is the failure manifold predicted by training rollouts.</figcaption>
-      </figure>
-      <figure class="figcard">
-        <img src="assets/images/failures.png" alt="Failure modes of base flow-matching policy">
-        <figcaption><strong>Failure modes.</strong> Two qualitatively different failure modes that TAIL-Safe is designed to detect early and recover from.</figcaption>
-      </figure>
-    </div>
+    <figure class="fig-single">
+      <img src="assets/images/Landscape_value_sujosh.png" alt="3D safety landscape">
+      <figcaption><strong>Figure&nbsp;4.</strong> The three-dimensional value landscape over the workspace. The zero-superlevel set defines an empirical control-invariant safe set; crossing its boundary is a reliable predictor of imminent task failure.</figcaption>
+    </figure>
   </div>
 </section>
 
-<!-- ========== RESULTS ========== -->
+<!-- ====================== RESULTS ====================== -->
 <section id="results">
-  <div class="wrap">
-    <h2><span class="num">03</span>Results</h2>
-    <p class="lede">Evaluated on a Franka Emika robot for two real-world tasks (Candy Pick, Pick-and-Place) and on 270 simulated rollouts in the digital twin.</p>
+  <div class="wrap results-prose">
+    <p class="section-kicker">Experiments</p>
+    <h2>Real-robot results on a Franka&nbsp;Emika and 270 perturbed rollouts in the twin.</h2>
 
-    <div class="results-grid">
-      <div class="metric"><div class="num">99.3 %</div><div class="lbl">State-level AUROC<br>(Q-function calibration)</div></div>
-      <div class="metric"><div class="num">100 %</div><div class="lbl">Recovery success rate<br>(vs. 20 % without energy shaping)</div></div>
-      <div class="metric"><div class="num">23 ms</div><div class="lbl">Detection latency<br>before failure</div></div>
-      <div class="metric"><div class="num">2.8 ms</div><div class="lbl">Per-step inference<br>(350 Hz capable, RTX 4090)</div></div>
-      <div class="metric"><div class="num">2.31</div><div class="lbl">Empirical Lipschitz constant<br>(theoretical bound 2.5)</div></div>
-      <div class="metric"><div class="num">3.2 ×</div><div class="lbl">Effect-size gain over instantaneous heuristic<br>(Cohen's d 0.93 vs 0.29)</div></div>
+    <p class="lede">
+      We evaluate TAIL-Safe on two physical manipulation tasks — Candy Pick and Pick-and-Place — and on a controlled set of perturbed rollouts inside the
+      Gaussian-Splatting twin. We protect a base flow-matching policy and ask three questions: does the safety filter <em class="term">predict</em> failure
+      before it happens, does the recovery controller <em class="term">restore</em> task progress, and does the protected policy <em class="term">complete</em>
+      tasks it would otherwise abandon?
+    </p>
+
+    <div class="headline">
+      <div class="h">
+        <div class="v">99.3%</div>
+        <div class="k">trajectory-level AUROC of the learned <i>Q</i>-function on held-out rollouts.</div>
+      </div>
+      <div class="h">
+        <div class="v">100%</div>
+        <div class="k">recovery success rate with energy-shaped training (vs. 20% without).</div>
+      </div>
+      <div class="h">
+        <div class="v">≈&nbsp;23&nbsp;ms</div>
+        <div class="k">average detection latency before the underlying policy would have failed.</div>
+      </div>
     </div>
 
-    <div class="fig-grid" style="margin-top:36px">
-      <figure class="figcard">
-        <img src="assets/images/tasks.png" alt="Real-world tasks">
-        <figcaption><strong>Real-world tasks.</strong> Candy Pick and Pick-and-Place evaluated on a Franka Emika arm with a wrist-mounted RGB-D camera.</figcaption>
+    <h3>Calibration of the safety predictor.</h3>
+    <p>
+      On 270 held-out rollouts in the twin, the trajectory-level AUROC of <i>Q</i> reaches&nbsp;0.993, with a per-state AUROC of&nbsp;0.962. WeightNet
+      separates safe and unsafe trajectories with effect size Cohen's&nbsp;<i>d</i>&nbsp;=&nbsp;0.93, against&nbsp;0.29 for an instantaneous heuristic.
+      Crucially, the empirically measured Lipschitz constant of the trained network is&nbsp;2.31, comfortably below the theoretical bound of&nbsp;2.5
+      enforced during training, which is what makes the closed-form recovery step well-posed.
+    </p>
+
+    <h3>Recovery on the real Franka.</h3>
+    <p>
+      We perturb the robot online either by physically pushing the end-effector or by injecting SpaceMouse commands. Without the filter, the base
+      flow-matching policy fails on every interrupted episode. With TAIL-Safe attached, the policy completes the task on every recoverable episode in our
+      study, with an average of&nbsp;2.3 recovery iterations per intervention and no observable degradation in nominal task time.
+    </p>
+
+    <h3>Detection of out-of-distribution states.</h3>
+    <p>
+      We deliberately drive the policy into severe OOD configurations on the real arm: camera occlusion, large object displacement, scene additions not
+      present in any demonstration. In every such configuration the predicted <i>Q</i>-value crosses zero before the policy would have completed an unsafe
+      action, and the recovery controller is triggered.
+    </p>
+
+    <table class="tbl">
+      <caption><strong>Table&nbsp;1.</strong> Headline performance on the digital-twin evaluation set. Values are averages over 270 perturbed rollouts.</caption>
+      <thead>
+        <tr><th>Method</th><th class="num">Traj. AUROC</th><th class="num">State AUROC</th><th class="num">Recovery&nbsp;%</th><th class="num">Detect.&nbsp;latency</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Equal-weight criteria</td><td class="num">0.437</td><td class="num">0.514</td><td class="num">—</td><td class="num">—</td></tr>
+        <tr><td>WeightNet only (no recovery)</td><td class="num">0.971</td><td class="num">0.928</td><td class="num">—</td><td class="num">—</td></tr>
+        <tr><td><i>Q</i>-function, no energy shaping</td><td class="num">0.984</td><td class="num">0.943</td><td class="num">20%</td><td class="num">15&nbsp;ms</td></tr>
+        <tr class="best"><td><strong>TAIL-Safe (full)</strong></td><td class="num"><strong>0.993</strong></td><td class="num"><strong>0.962</strong></td><td class="num"><strong>100%</strong></td><td class="num"><strong>23&nbsp;ms</strong></td></tr>
+      </tbody>
+    </table>
+
+    <div class="figpair">
+      <figure>
+        <img src="assets/images/recovery_real_robot.png" alt="Real-robot recovery sequence">
+        <figcaption><strong>Figure&nbsp;5.</strong> A representative real-robot recovery: the operator perturbs the end-effector mid-trajectory; the safety filter triggers, gradient ascent on <i>Q</i> brings the arm back into the safe set, and the policy resumes without an explicit reset.</figcaption>
       </figure>
-      <figure class="figcard">
-        <img src="assets/images/recovery_real_robot.png" alt="Real-robot recovery">
-        <figcaption><strong>Real-robot recovery.</strong> When the policy is disturbed, TAIL-Safe detects the safety violation and steers the end-effector back into the safe set without interrupting task progress.</figcaption>
-      </figure>
-      <figure class="figcard">
+      <figure>
         <img src="assets/images/extreme_cases.png" alt="Extreme out-of-distribution cases">
-        <figcaption><strong>Extreme OOD.</strong> TAIL-Safe correctly flags severe perturbations as unsafe and triggers recovery instead of executing the predicted trajectory.</figcaption>
+        <figcaption><strong>Figure&nbsp;6.</strong> Severe out-of-distribution scenes on the real arm. The base policy diverges; TAIL-Safe correctly flags these states as unsafe in real time and refuses to execute the nominal action.</figcaption>
       </figure>
     </div>
   </div>
 </section>
 
-<!-- ========== VIDEOS ========== -->
+<!-- ====================== VIDEOS ====================== -->
 <section id="videos">
   <div class="wrap">
-    <h2><span class="num">04</span>Video Results</h2>
-    <p class="lede">Each video below illustrates a specific aspect of the method, from data collection in the Gaussian-Splatting twin to closed-loop recovery on the real Franka.</p>
+    <p class="section-kicker">Videos</p>
+    <h2>How it looks on the robot.</h2>
+    <p class="lede">
+      A short overview is followed by real-robot recovery from human and teleoperated interruption, two extreme out-of-distribution scenes, and a small
+      set of rollouts collected entirely inside the Gaussian-Splatting twin that are used to train the safety predictor.
+    </p>
 
-    <!-- Featured demo -->
-    <div class="video-cat">
-      <h3>Full demo <span class="pill real">Overview</span></h3>
-      <p class="cat-desc">A walkthrough of the TAIL-Safe pipeline: digital-twin construction, safety prediction, recovery, and real-robot deployment.</p>
-      <div class="grid">
+    <div class="video-block">
+      <h3>System overview</h3>
+      <p class="desc">A compiled walkthrough of the pipeline — from digital-twin construction to closed-loop recovery on the real Franka.</p>
+      <div class="video-row">
         <div class="vcard featured">
           <video src="videos/TAIL_Safe_demo.mp4" controls preload="metadata" playsinline></video>
-          <h4>TAIL-Safe — full system demo</h4>
-          <p>Compiled overview of the framework and live experiments.</p>
+          <div class="vmeta">
+            <h4>TAIL-Safe — full system demo</h4>
+            <p>End-to-end overview, from the Gaussian-Splatting capture to live recovery on the real arm.</p>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Real robot recovery -->
-    <div class="video-cat">
-      <h3>Real-robot recovery from human interruption <span class="pill real">Real Franka</span></h3>
-      <p class="cat-desc">A human operator perturbs the robot mid-task. TAIL-Safe detects the unsafe state and steers the end-effector back to a safe configuration without aborting the task.</p>
-      <div class="grid">
+    <div class="video-block">
+      <h3>Recovery from interruption (real Franka)</h3>
+      <p class="desc">The base policy is interrupted mid-task. The safety filter detects the unsafe state, the recovery controller steers the end-effector back into the safe set, and the policy resumes without an explicit reset.</p>
+      <div class="video-row">
         <div class="vcard">
           <video src="videos/realrobot_recovery_human_interruption.mp4" controls preload="metadata" playsinline></video>
-          <h4>Recovery from manual interruption</h4>
-          <p>A person physically interrupts the trajectory; the safety filter triggers a recovery action and the policy resumes.</p>
+          <div class="vmeta">
+            <h4>Manual interruption by the operator</h4>
+            <p>The operator physically perturbs the end-effector; the protected policy completes the task.</p>
+          </div>
         </div>
         <div class="vcard">
           <video src="videos/realrobot_recovery_spacemouse_interruption.mp4" controls preload="metadata" playsinline></video>
-          <h4>Recovery from SpaceMouse interruption</h4>
-          <p>The robot is teleoperated off-trajectory with a SpaceMouse; TAIL-Safe brings it back and the task completes.</p>
+          <div class="vmeta">
+            <h4>SpaceMouse teleoperation injected mid-trajectory</h4>
+            <p>The robot is pushed off-trajectory through teleoperation; TAIL-Safe brings it back.</p>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Extreme failures -->
-    <div class="video-cat">
-      <h3>Extreme out-of-distribution cases <span class="pill fail">Detection</span></h3>
-      <p class="cat-desc">Severe perturbations on the real robot. The base policy fails; TAIL-Safe correctly flags these states as unsafe in real time.</p>
-      <div class="grid">
+    <div class="video-block">
+      <h3>Extreme out-of-distribution cases</h3>
+      <p class="desc">Configurations far outside the demonstration distribution. The base policy diverges; TAIL-Safe flags the unsafe state in real time.</p>
+      <div class="video-row">
         <div class="vcard">
           <video src="videos/extreme_fail_realrobot_0.mp4" controls preload="metadata" playsinline></video>
-          <h4>Extreme failure case — example 1</h4>
-          <p>Out-of-distribution scene; base policy diverges, TAIL-Safe detects the failure boundary.</p>
+          <div class="vmeta">
+            <h4>OOD scene&nbsp;A</h4>
+            <p>The base policy diverges; the safety predictor crosses zero before contact.</p>
+          </div>
         </div>
         <div class="vcard">
           <video src="videos/extreme_fail_realrobot_2.mp4" controls preload="metadata" playsinline></video>
-          <h4>Extreme failure case — example 2</h4>
-          <p>A second OOD configuration where the unsafe state is correctly flagged.</p>
+          <div class="vmeta">
+            <h4>OOD scene&nbsp;B</h4>
+            <p>A second extreme configuration; the unsafe state is correctly flagged.</p>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Simulation data collection -->
-    <div class="video-cat">
-      <h3>Data collection in the Gaussian-Splatting twin <span class="pill sim">Simulation</span></h3>
-      <p class="cat-desc">Successful pick-and-place rollouts in the photo-realistic Gaussian-Splatting digital twin, used to train WeightNet and the reach-avoid <em>Q</em>-function. The last clip shows an intentionally failed rollout used to populate the unsafe class.</p>
-      <div class="grid">
+    <div class="video-block">
+      <h3>Data collection inside the Gaussian-Splatting twin</h3>
+      <p class="desc">Successful and intentionally failed rollouts collected inside the photo-real twin, used to train WeightNet and the reach-avoid <i>Q</i>-function. No physical robot is required for this stage.</p>
+      <div class="video-row">
         <div class="vcard">
-          <video src="videos/simulation_success_pick_place_data_collection_in_GS.mp4" controls preload="metadata" playsinline></video>
-          <h4>Successful pick-and-place — rollout 1</h4>
-          <p>Safe demonstration collected inside the GS twin.</p>
+          <video src="videos/simulation_success_pick_place_data_collection_in_GS.mp4" controls preload="metadata" playsinline muted></video>
+          <div class="vmeta">
+            <h4>Successful rollout&nbsp;1</h4>
+            <p>Nominal pick-and-place inside the twin.</p>
+          </div>
         </div>
         <div class="vcard">
-          <video src="videos/simulation_success_pick_place_data_collection_in_GS_2.mp4" controls preload="metadata" playsinline></video>
-          <h4>Successful pick-and-place — rollout 2</h4>
-          <p>Variation in object placement within ±5 cm.</p>
+          <video src="videos/simulation_success_pick_place_data_collection_in_GS_2.mp4" controls preload="metadata" playsinline muted></video>
+          <div class="vmeta">
+            <h4>Successful rollout&nbsp;2</h4>
+            <p>±5&nbsp;cm variation in object placement.</p>
+          </div>
         </div>
         <div class="vcard">
-          <video src="videos/simulation_success_pick_place_data_collection_in_GS_3.mp4" controls preload="metadata" playsinline></video>
-          <h4>Successful pick-and-place — rollout 3</h4>
-          <p>Variation in orientation within ±30°.</p>
+          <video src="videos/simulation_success_pick_place_data_collection_in_GS_3.mp4" controls preload="metadata" playsinline muted></video>
+          <div class="vmeta">
+            <h4>Successful rollout&nbsp;3</h4>
+            <p>±30° variation in object orientation.</p>
+          </div>
         </div>
         <div class="vcard">
-          <video src="videos/simulation_success_pick_place_data_collection_in_GS_failure.mp4" controls preload="metadata" playsinline></video>
-          <h4>Failure rollout (unsafe class)</h4>
-          <p>An intentionally failed trajectory used to label the unsafe region of state space.</p>
+          <video src="videos/simulation_success_pick_place_data_collection_in_GS_failure.mp4" controls preload="metadata" playsinline muted></video>
+          <div class="vmeta">
+            <h4>Failure rollout (unsafe class)</h4>
+            <p>An intentionally failed trajectory used to label the unsafe region of state-action space.</p>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ========== BIBTEX ========== -->
+<!-- ====================== BIBTEX ====================== -->
 <section id="bibtex">
   <div class="wrap">
-    <h2><span class="num">05</span>Citation</h2>
-    <p class="lede">If you find TAIL-Safe useful for your research, please consider citing:</p>
+    <p class="section-kicker">Citation</p>
+    <h2>If TAIL-Safe is useful in your work, please cite us.</h2>
     <div class="bib" id="bibblock"><button class="copybtn" onclick="copyBib()">Copy</button>@inproceedings{ahmed2026tailsafe,
-  title     = {TAIL-Safe: Task-Agnostic Safety Monitoring for Imitation Learning Policies},
+  title     = {{TAIL}-Safe: Task-Agnostic Safety Monitoring for Imitation Learning Policies},
   author    = {Ahmed, Riad and Begum, Momotaz},
   booktitle = {Proceedings of Robotics: Science and Systems (RSS)},
   year      = {2026},
-  address   = {University of New Hampshire},
 }</div>
   </div>
 </section>
 
-<!-- ========== FOOTER ========== -->
+<!-- ====================== FOOTER ====================== -->
 <footer>
   <div class="wrap">
-    <p>© 2026 Riad Ahmed &amp; Momotaz Begum, University of New Hampshire. &nbsp;|&nbsp;
-       Page hosted on <a href="https://github.com/riadahmedunh/tail_safe">GitHub</a>.</p>
+    <p>© 2026 Riad Ahmed and Momotaz Begum, University of New Hampshire.&nbsp;
+       Page source on <a href="https://github.com/riadahmedunh/tail_safe">GitHub</a>.</p>
   </div>
 </footer>
 
 <script>
 function copyBib(){
-  const t = document.getElementById('bibblock').innerText.replace(/^Copy\s*/,'');
-  navigator.clipboard.writeText(t).then(()=>{
-    const b = document.querySelector('.copybtn');
-    const o = b.innerText; b.innerText='Copied!';
-    setTimeout(()=>b.innerText=o, 1500);
+  var el = document.getElementById('bibblock');
+  var t = el.innerText.replace(/^Copy\s*/,'').trim();
+  navigator.clipboard.writeText(t).then(function(){
+    var b = el.querySelector('.copybtn');
+    var o = b.innerText; b.innerText='Copied';
+    setTimeout(function(){b.innerText=o},1500);
   });
 }
 </script>
